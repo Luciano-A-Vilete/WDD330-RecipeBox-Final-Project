@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecipeBox – Smart Recipe Finder</title>
+    <!-- Google Fonts: DM Sans (body) + Caveat (accent/brand) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <!-- ===== HEADER / NAV ===== -->
+    <header>
+        <div class="header-inner">
+            <h1>🍴 RecipeBox</h1>
+            <nav aria-label="Main navigation">
+                <a href="#search" class="nav-link active" data-section="search">Search</a>
+                <a href="#favorites" class="nav-link" data-section="favorites">Favorites</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- ===== SEARCH SECTION ===== -->
+        <section id="search-section">
+            <form id="search-form" class="search-form" novalidate>
+
+                <!-- Screen-reader label for input -->
+                <label for="search-input" class="sr-only">Search recipes</label>
+                <input type="search" id="search-input" class="search-input"
+                    placeholder="Search by ingredient, dish, or cuisine..." aria-label="Search recipes"
+                    autocomplete="off">
+
+                <div class="filters">
+                    <select id="diet-filter" aria-label="Dietary restriction">
+                        <option value="">All Diets</option>
+                        <option value="vegetarian">Vegetarian</option>
+                        <option value="vegan">Vegan</option>
+                        <option value="gluten free">Gluten Free</option>
+                        <option value="ketogenic">Ketogenic</option>
+                        <option value="paleo">Paleo</option>
+                    </select>
+
+                    <select id="cuisine-filter" aria-label="Cuisine type">
+                        <option value="">All Cuisines</option>
+                        <option value="italian">Italian</option>
+                        <option value="mexican">Mexican</option>
+                        <option value="asian">Asian</option>
+                        <option value="american">American</option>
+                        <option value="mediterranean">Mediterranean</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-search">Search Recipes</button>
+            </form>
+        </section>
+
+        <!-- ===== RESULTS SECTION ===== -->
+        <!-- aria-live="polite" announces new results to screen readers -->
+        <section id="results-section" aria-live="polite" aria-label="Search results">
+            <div id="loading" class="loading hidden" role="status">
+                <div class="spinner" aria-hidden="true"></div>
+                <p>Finding recipes...</p>
+            </div>
+            <div id="results-grid" class="results-grid" role="list"></div>
+        </section>
+
+        <!-- ===== FAVORITES SECTION (hidden by default) ===== -->
+        <section id="favorites-section" class="hidden" aria-label="Saved favorites">
+            <h2 class="section-title">My Favorites</h2>
+            <div id="favorites-grid" class="results-grid" role="list"></div>
+        </section>
+
+    </main>
+
+    <!-- ===== RECIPE DETAIL MODAL ===== -->
+    <!-- Native <dialog> element = best practice for accessible modals -->
+    <dialog id="recipe-modal" class="recipe-modal" aria-labelledby="modal-title">
+        <button class="modal-close" aria-label="Close recipe details">✕</button>
+        <div id="modal-content" class="modal-content"></div>
+    </dialog>
+
+    <!-- type="module" enables ES6 import/export -->
+    <script type="module" src="js/app.js"></script>
+
+</body>
+
+</html>
