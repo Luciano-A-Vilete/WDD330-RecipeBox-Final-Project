@@ -11,7 +11,7 @@
     --color-text-muted: #636e72;
     --color-border: #dfe6e9;
 
-    --header-height: 56px; /* used to offset sticky search bar */
+    --header-height: 60px; /* actual header: 16px top pad + ~27px h1 + 16px bottom pad ≈ 59px */
     --radius: 12px;
     --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.14);
@@ -166,6 +166,7 @@ nav {
 .filters select {
     flex: 1;
     padding: 0.7rem 0.75rem;
+    min-height: 44px; /* touch target */
     font-size: 0.9rem;
     font-family: var(--font-main);
     border: 2px solid var(--color-border);
@@ -208,7 +209,7 @@ nav {
 #featured-section {
     max-width: 900px;
     margin: 0 auto 2rem;
-    padding: 0 1rem;
+    padding: 1.25rem 1rem 0; /* top gap from sticky search bar */
 }
 
 .featured-card {
@@ -439,6 +440,7 @@ nav {
 .btn-details {
     flex: 1;
     padding: 0.6rem;
+    min-height: 44px; /* touch target */
     background: var(--color-primary);
     color: white;
     border: none;
@@ -455,6 +457,7 @@ nav {
 
 .btn-favorite {
     padding: 0.6rem 0.9rem;
+    min-height: 44px; /* touch target */
     background: transparent;
     border: 2px solid var(--color-border);
     border-radius: 8px;
@@ -499,7 +502,9 @@ nav {
    MODAL — full-screen on mobile, floating dialog on tablet+
    ================================ */
 .recipe-modal {
-    /* Full-screen on mobile */
+    /* Full-screen on mobile — explicit positioning overrides browser UA sheet */
+    position: fixed;
+    inset: 0;
     width: 100%;
     max-width: 100%;
     height: 100dvh;
@@ -543,6 +548,8 @@ nav {
 .modal-content {
     overflow-y: auto;
     height: 100dvh;
+    overscroll-behavior: contain; /* prevents iOS scroll-chaining to the page behind */
+    -webkit-overflow-scrolling: touch; /* momentum scrolling on older iOS */
 }
 
 /* Hero image with title overlay */

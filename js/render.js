@@ -1,13 +1,19 @@
 // ============================================
 // RENDER MODULE — All DOM rendering functions
+// Pure output: receives data, returns HTML strings or updates the DOM.
+// No API calls, no localStorage — keeps rendering concerns isolated.
 // ============================================
 
 import { isFavorite } from './favorites.js';
 
 /**
- * Render an array of recipe cards into a container element
- * @param {Array}       recipes   — array of recipe objects
- * @param {HTMLElement} container — the grid element to render into
+ * Render an array of recipe cards into a container element.
+ * Uses innerHTML (not individual createElement calls) because building
+ * the entire grid as one string and setting it once is faster than
+ * appending nodes one-by-one in a loop.
+ *
+ * @param {Array}       recipes     — array of recipe objects from Spoonacular
+ * @param {HTMLElement} container   — the grid element to render into
  * @param {Function}    onDetails   — callback when "View Recipe" is clicked
  * @param {Function}    onFavorite  — callback when favorite button is clicked
  */
@@ -19,13 +25,16 @@ export function renderRecipeCards(recipes, container, onDetails, onFavorite) {
 
   container.innerHTML = recipes.map(recipe => buildCardHTML(recipe)).join('');
 
-  // Attach event listeners after HTML is in the DOM
+  // Event listeners must be attached after innerHTML is set —
+  // the elements don't exist in the DOM until that line runs.
   container.querySelectorAll('.btn-details').forEach(btn => {
     btn.addEventListener('click', () => onDetails(Number(btn.dataset.id)));
   });
 
   container.querySelectorAll('.btn-favorite').forEach(btn => {
     btn.addEventListener('click', e => {
+      // stopPropagation prevents the card's own click (if any) from also firing
+      // when the heart button is tapped — avoids double-handling the event.
       e.stopPropagation();
       onFavorite(btn);
     });
@@ -33,12 +42,21 @@ export function renderRecipeCards(recipes, container, onDetails, onFavorite) {
 }
 
 /**
- * Build HTML string for a single recipe card
- * @param {Object} recipe
- * @returns {string}
+ * Build HTML string for a single recipe card.
+ *
+ * Design note — data-recipe stores a JSON snapshot of the recipe object.
+ * This avoids an extra API call when the user saves a favorite: the
+ * favorite toggle handler reads the data from the button itself rather
+ * than re-fetching from the network.
+ *
+ * @param {Object} recipe — Spoonacular recipe object
+ * @returns {string}      — HTML string for one <article> card
  */
 export function buildCardHTML(recipe) {
-  const saved    = isFavorite(recipe.id);
+  const saved = isFavorite(recipe.id);
+
+  // Emoji are wrapped in aria-hidden so screen readers skip them,
+  // and sr-only spans provide the accessible text equivalent instead.
   const cookTime = recipe.readyInMinutes
     ? `<span aria-hidden="true">⏱</span> <span class="sr-only">Cook time:</span>${recipe.readyInMinutes} min`
     : '';
@@ -46,6 +64,8 @@ export function buildCardHTML(recipe) {
     ? `<span aria-hidden="true">🍽</span> <span class="sr-only">Servings:</span>${recipe.servings} servings`
     : '';
 
+  // Only the fields needed for the favorites list are serialised here —
+  // full recipe detail is fetched fresh when the modal opens.
   const recipeData = JSON.stringify({
     id:             recipe.id,
     title:          recipe.title,
@@ -89,28 +109,37 @@ export function buildCardHTML(recipe) {
 }
 
 /**
- * Build modal HTML from a recipe + nutrition nutrients array
- * @param {Object} recipe
- * @param {Array}  nutrients     — from getNutritionById() (Spoonacular)
- * @param {Object} usdaNutrition — from searchUSDANutrition() (USDA), may be null
- * @returns {string}
+ * Build the full recipe detail modal HTML.
+ * Combines Spoonacular nutrition (with % daily value bars) and optional
+ * USDA nutrition data into a single scrollable view.
+ *
+ * @param {Object} recipe        — full recipe object from getRecipeById()
+ * @param {Array}  nutrients     — nutrient array from getNutritionById()
+ * @param {Object} usdaNutrition — result from searchUSDANutrition(), or null
+ * @returns {string}             — complete HTML string for modal-content
  */
 export function buildModalHTML(recipe, nutrients = [], usdaNutrition = null) {
-  // Returns { value, pct } for a nutrient — pct capped at 100 for the bar width
+  // Closure over `nutrients` — avoids passing the array into every call.
+  // Returns { value, pct } where pct is capped at 100 for the bar width.
   const getNutrient = name => {
     const found = nutrients.find(n => n.name === name);
     if (!found) return { value: '–', pct: 0 };
     return {
       value: `${Math.round(found.amount)}${found.unit}`,
-      pct:   Math.min(Math.round(found.percentOfDailyNeeds ?? 0), 100),
+      // percentOfDailyNeeds is occasionally absent in the API response —
+      // the ?? 0 fallback prevents NaN from reaching the progress bar.
+      pct: Math.min(Math.round(found.percentOfDailyNeeds ?? 0), 100),
     };
   };
 
+  // Strip HTML tags injected by Spoonacular (their summaries contain <b>, <a>, etc.)
+  // and truncate to a reasonable preview length.
   const summary = recipe.summary
     ? recipe.summary.replace(/<[^>]+>/g, '').slice(0, 300) + '...'
     : '';
 
-  // Build ingredients list from extendedIngredients if available
+  // extendedIngredients contains the full human-readable strings like
+  // "2 cups all-purpose flour, sifted" — more useful than name alone.
   const ingredients = recipe.extendedIngredients
     ? recipe.extendedIngredients
         .map(ing => `<li>${ing.original}</li>`)
@@ -187,10 +216,13 @@ export function buildModalHTML(recipe, nutrients = [], usdaNutrition = null) {
 
 /**
  * Build numbered cooking steps HTML from Spoonacular's analyzedInstructions.
- * Handles multiple instruction sets (e.g. "For the sauce:" + "For the chicken:").
+ *
+ * analyzedInstructions is an array because some recipes have multiple
+ * named sections (e.g. "For the sauce:" followed by "For the chicken:").
+ * Each section has its own steps array and optional name string.
  *
  * @param {Array} instructions — recipe.analyzedInstructions from Spoonacular
- * @returns {string} — HTML string, or '' if no instructions
+ * @returns {string}           — HTML string, or '' if no instructions exist
  */
 function buildStepsHTML(instructions) {
   if (!instructions || instructions.length === 0) return '';
@@ -213,7 +245,9 @@ function buildStepsHTML(instructions) {
 }
 
 /**
- * Show an empty search prompt before the user has searched for anything
+ * Render the pre-search empty state in the results grid.
+ * Called once on page load; replaced when the first search completes.
+ *
  * @param {HTMLElement} container — the results grid element
  */
 export function showEmptyState(container) {
@@ -227,18 +261,22 @@ export function showEmptyState(container) {
 }
 
 /**
- * Show or hide the loading spinner
+ * Show or hide the loading spinner by toggling the .hidden class.
+ *
  * @param {HTMLElement} el   — the loading element
- * @param {boolean}     show
+ * @param {boolean}     show — true to show, false to hide
  */
 export function setLoading(el, show) {
   el.classList.toggle('hidden', !show);
 }
 
 /**
- * Show an error message inside a container
- * @param {HTMLElement} container
- * @param {string}      message
+ * Render an error message inside a container.
+ * Uses the same grid-column span as .no-results so it centers correctly
+ * regardless of how many columns the grid has.
+ *
+ * @param {HTMLElement} container — target element
+ * @param {string}      message   — error text to display
  */
 export function showError(container, message) {
   container.innerHTML = `<p class="error-msg">⚠️ ${message}</p>`;
