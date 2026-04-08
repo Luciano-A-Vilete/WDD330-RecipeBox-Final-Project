@@ -2,8 +2,9 @@
 // RECIPES MODULE — Recipe search & detail API calls
 // ============================================
 
+import { SPOONACULAR_API_KEY as API_KEY } from './config.js';
+
 const BASE_URL = 'https://api.spoonacular.com';
-const API_KEY  = '0a6488ae8f1745aa8c764ed39a755554';
 
 /**
  * Search for recipes by query, diet, and cuisine
@@ -36,6 +37,31 @@ export async function searchRecipes(query, diet = '', cuisine = '', number = 12)
 
   const data = await response.json();
   return data.results;
+}
+
+/**
+ * Fetch one random recipe from Spoonacular /recipes/random
+ * @returns {Promise<Object>} — a single recipe object
+ */
+export async function getRandomRecipe() {
+  const params = new URLSearchParams({
+    apiKey:               API_KEY,
+    number:               1,
+    addRecipeInformation: true,
+  });
+
+  const response = await fetch(
+    `${BASE_URL}/recipes/random?${params}`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(`Random recipe failed (${response.status}): ${err.message || response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.recipes[0]; // endpoint always returns an array
 }
 
 /**

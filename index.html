@@ -10,8 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=DM+Sans:wght@400;500;600&display=swap"
         rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/styles.css">
+
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -20,24 +19,30 @@
     <!-- ===== HEADER / NAV ===== -->
     <header>
         <div class="header-inner">
-            <h1>🍴 RecipeBox</h1>
+            <h1><span aria-hidden="true">🍴</span> RecipeBox</h1>
             <nav aria-label="Main navigation">
-                <a href="#search" class="nav-link active" data-section="search">Search</a>
-                <a href="#favorites" class="nav-link" data-section="favorites">Favorites</a>
+                <!-- href targets real section IDs so fragment links are valid -->
+                <a href="#search-section" class="nav-link active" data-section="search" aria-current="page">Search</a>
+                <a href="#favorites-section" class="nav-link" data-section="favorites">Favorites</a>
             </nav>
         </div>
     </header>
 
     <main>
 
+        <!-- ===== FEATURED RECIPE (loaded on page load) ===== -->
+        <section id="featured-section" aria-label="Featured recipe">
+            <div id="featured-card" class="featured-card"></div>
+        </section>
+
         <!-- ===== SEARCH SECTION ===== -->
-        <section id="search-section">
+        <section id="search-section" aria-label="Recipe search">
             <form id="search-form" class="search-form" novalidate>
 
-                <!-- Screen-reader label for input -->
+                <!-- <label> provides the accessible name — no aria-label needed on the input -->
                 <label for="search-input" class="sr-only">Search recipes</label>
                 <input type="search" id="search-input" class="search-input"
-                    placeholder="Search by ingredient, dish, or cuisine..." aria-label="Search recipes"
+                    placeholder="Search by ingredient, dish, or cuisine..."
                     autocomplete="off">
 
                 <div class="filters">
@@ -76,18 +81,43 @@
 
         <!-- ===== FAVORITES SECTION (hidden by default) ===== -->
         <section id="favorites-section" class="hidden" aria-label="Saved favorites">
-            <h2 class="section-title">My Favorites</h2>
+            <div class="fav-header">
+                <h2 class="fav-title">My Favorites</h2>
+                <span id="fav-count" class="fav-count" aria-live="polite" aria-atomic="true"></span>
+                <button id="fav-clear" class="fav-clear hidden" aria-label="Clear all favorites">
+                    Clear all
+                </button>
+            </div>
             <div id="favorites-grid" class="results-grid" role="list"></div>
         </section>
 
     </main>
 
     <!-- ===== RECIPE DETAIL MODAL ===== -->
-    <!-- Native <dialog> element = best practice for accessible modals -->
-    <dialog id="recipe-modal" class="recipe-modal" aria-labelledby="modal-title">
-        <button class="modal-close" aria-label="Close recipe details">✕</button>
+    <!-- Native <dialog> element = best practice for accessible modals.
+         aria-label provides a static name; when JS injects modal-title,
+         aria-labelledby on the rendered h2 gives the specific recipe name. -->
+    <dialog id="recipe-modal" class="recipe-modal" aria-label="Recipe details">
+        <button class="modal-close" aria-label="Close recipe details">&#x2715;</button>
         <div id="modal-content" class="modal-content"></div>
     </dialog>
+
+    <!-- ===== BOTTOM TAB BAR (mobile only, hidden via CSS on desktop) ===== -->
+    <nav class="bottom-nav" aria-label="Tab navigation">
+        <a href="#search-section" class="bottom-tab active" data-section="search" aria-current="page">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Search</span>
+        </a>
+        <a href="#favorites-section" class="bottom-tab" data-section="favorites">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span>Favorites</span>
+        </a>
+    </nav>
 
     <!-- type="module" enables ES6 import/export -->
     <script type="module" src="js/app.js"></script>

@@ -2,8 +2,9 @@
 // NUTRITION MODULE — Nutrition data API calls
 // ============================================
 
+import { SPOONACULAR_API_KEY as API_KEY } from './config.js';
+
 const BASE_URL = 'https://api.spoonacular.com';
-const API_KEY  = '0a6488ae8f1745aa8c764ed39a755554';
 
 /**
  * Get full nutrition data for a recipe by ID

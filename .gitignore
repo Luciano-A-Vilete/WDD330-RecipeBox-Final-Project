@@ -14,3 +14,6 @@ Thumbs.db
 # Environment files (API keys — keep these private!)
 .env
 .env.local
+
+# Local API key config (copy config.example.js → config.js to set up)
+js/config.js

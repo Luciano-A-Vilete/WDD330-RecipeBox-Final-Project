@@ -65,15 +65,61 @@ export function handleFavoriteToggle(btn) {
     btn.textContent = '❤️';
     btn.setAttribute('aria-label', 'Remove from favorites');
     btn.setAttribute('aria-pressed', 'true');
+
+    // Pulse animation — add .pop, remove it once the animation ends
+    btn.classList.add('pop');
+    btn.addEventListener('animationend', () => btn.classList.remove('pop'), { once: true });
   }
 }
 
 /**
- * Render all saved favorites into a container
+ * Render all saved favorites into a container.
+ * Also updates the count badge and clear button in the favorites header.
+ *
  * @param {HTMLElement} container
  * @param {Function}    onDetails  — callback for View Recipe button
  */
 export function renderFavorites(container, onDetails) {
   const favorites = getFavorites();
-  renderRecipeCards(favorites, container, onDetails, handleFavoriteToggle);
+
+  // Update count badge
+  const countEl = document.getElementById('fav-count');
+  if (countEl) countEl.textContent = favorites.length ? `· ${favorites.length}` : '';
+
+  // Show/hide "Clear all" button
+  const clearBtn = document.getElementById('fav-clear');
+  if (clearBtn) {
+    clearBtn.classList.toggle('hidden', favorites.length === 0);
+    clearBtn.onclick = () => {
+      localStorage.removeItem(FAVORITES_KEY);
+      renderFavorites(container, onDetails); // re-render after clearing
+    };
+  }
+
+  if (favorites.length === 0) {
+    container.innerHTML = `
+      <div class="fav-empty">
+        <p class="empty-icon">🤍</p>
+        <h2 class="empty-title">No saved recipes yet</h2>
+        <p class="empty-hint">Tap the heart on any recipe to save it here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  renderRecipeCards(favorites, container, onDetails, removeFavoriteCard);
+}
+
+/**
+ * Remove a favorite from localStorage AND remove its card from the DOM.
+ * Used exclusively in the favorites view so the grid stays in sync.
+ *
+ * @param {HTMLElement} btn — the favorite button that was clicked
+ */
+function removeFavoriteCard(btn) {
+  const id = Number(btn.dataset.id);
+  removeFavorite(id);
+
+  const card = btn.closest('article');
+  card?.remove();
 }
