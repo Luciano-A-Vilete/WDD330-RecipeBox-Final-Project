@@ -2,14 +2,16 @@
    CSS CUSTOM PROPERTIES (variables)
    ================================ */
 :root {
-    --color-primary: #e74c3c;
-    --color-primary-dark: #c0392b;
-    --color-secondary: #2ecc71;
-    --color-bg: #f8f9fa;
-    --color-surface: #ffffff;
-    --color-text: #2d3436;
-    --color-text-muted: #636e72;
-    --color-border: #dfe6e9;
+    /* ── RecipeBox brand palette ── */
+    --color-primary:      #2d6a4f;  /* forest green  */
+    --color-primary-dark: #1b4332;  /* deep forest   */
+    --color-secondary:    #74c69d;  /* sage          */
+    --color-accent:       #f4a261;  /* honey         */
+    --color-bg:           #f8f4e8;  /* cream         */
+    --color-surface:      #ffffff;
+    --color-text:         #2d3436;  /* charcoal      */
+    --color-text-muted:   #636e72;
+    --color-border:       #dfe6e9;
 
     --header-height: 60px; /* actual header: 16px top pad + ~27px h1 + 16px bottom pad ≈ 59px */
     --radius: 12px;
@@ -468,7 +470,8 @@ nav {
 
 .btn-favorite.saved {
     border-color: var(--color-primary);
-    background: #fff0f0;
+    /* soft tint of the forest green instead of red */
+    background: rgba(45, 106, 79, 0.08);
 }
 
 /* ================================
@@ -683,6 +686,27 @@ nav {
 }
 
 /* ================================
+   INGREDIENTS LIST
+   ================================ */
+.ingredients-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ingredients-list li {
+    padding: 0.5rem 0.75rem;
+    background: var(--color-bg);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    border-left: 3px solid var(--color-primary);
+    line-height: 1.4;
+}
+
+/* ================================
    BOTTOM TAB BAR (mobile only)
    ================================ */
 .bottom-nav {
@@ -879,7 +903,8 @@ nav {
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--color-primary);
-    background: #fff0f0;
+    /* soft tint of forest green for the step number bubble */
+    background: rgba(45, 106, 79, 0.1);
     border-radius: 50%;
     width: 1.75rem;
     height: 1.75rem;
@@ -918,9 +943,11 @@ nav {
     text-decoration: underline dotted;
 }
 
+/* Tinted with --color-secondary (sage green) to visually distinguish
+   USDA data from the Spoonacular nutrition grid above it */
 .usda-grid {
-    background: rgba(46, 204, 113, 0.08);
-    border: 1px solid rgba(46, 204, 113, 0.3);
+    background: rgba(116, 198, 157, 0.1);
+    border: 1px solid rgba(116, 198, 157, 0.35);
     border-radius: var(--radius);
     padding: 0.75rem;
 }
