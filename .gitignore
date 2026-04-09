@@ -15,5 +15,5 @@ Thumbs.db
 .env
 .env.local
 
-# Local API key config (copy config.example.js → config.js to set up)
-js/config.js
+# config.js is committed so the app works on GitHub Pages.
+# (Free-tier API keys — acceptable for a class project deployment.)
